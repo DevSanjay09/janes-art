@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark text-accent-light font-sans antialiased overflow-x-hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-dark-lighter/50 backdrop-blur-md border border-white/5;
+  }
+  
+  .glass-card {
+    @apply glass rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:bg-dark-lighter/70;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-2 bg-accent-pink text-dark font-medium rounded-full transition-all duration-300 hover:bg-accent-pink-light hover:scale-105 active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-2 bg-transparent border border-white/20 text-white font-medium rounded-full transition-all duration-300 hover:bg-white/10 active:scale-95;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-dark-lightest/50 border border-white/10 rounded-xl focus:outline-none focus:border-accent-pink focus:ring-1 focus:ring-accent-pink transition-colors text-white placeholder-white/40;
+  }
+}
+
+/* Masonry grid styles */
+.my-masonry-grid {
+  display: -webkit-box; /* Not needed if autoprefixing */
+  display: -ms-flexbox; /* Not needed if autoprefixing */
+  display: flex;
+  margin-left: -20px; /* gutter size offset */
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 20px; /* gutter size */
+  background-clip: padding-box;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a; 
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a; 
+}
