@@ -1,5 +1,5 @@
 import { collection, addDoc, getDocs, orderBy, query, serverTimestamp, deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { db, auth } from './firebase';
 
 const isMock = !import.meta.env.VITE_FIREBASE_API_KEY || import.meta.env.VITE_FIREBASE_API_KEY === 'mock_key';
@@ -131,7 +131,39 @@ export const loginAdmin = async (email, password) => {
   try {
     return await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login failed:", error);
+    throw error;
+  }
+};
+
+export const updateAdminCredentials = async (currentPassword, newEmail, newPassword) => {
+  if (isMock) {
+    return new Promise(resolve => setTimeout(resolve, 1000));
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("No user currently logged in");
+  }
+
+  try {
+    // 1. Re-authenticate
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+
+    // 2. Update Email if changed
+    if (newEmail && newEmail !== user.email) {
+      await updateEmail(user, newEmail);
+    }
+
+    // 3. Update Password if provided
+    if (newPassword) {
+      await updatePassword(user, newPassword);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Failed to update credentials:", error);
     throw error;
   }
 };

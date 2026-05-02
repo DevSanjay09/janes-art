@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, ArrowLeft, Settings, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, ArrowLeft, Settings, Image as ImageIcon, Lock } from 'lucide-react';
 import useStore from '../store/useStore';
-import { uploadImages, createPost, updateSettings } from '../lib/api';
+import { uploadImages, createPost, updateSettings, updateAdminCredentials } from '../lib/api';
 
 const AdminDashboard = () => {
   const { isAdmin, addPost, siteSettings, setSiteSettings } = useStore();
@@ -32,6 +32,14 @@ const AdminDashboard = () => {
   const [settingsSuccess, setSettingsSuccess] = useState('');
   const [bgPreview, setBgPreview] = useState(siteSettings.backgroundType === 'image' ? siteSettings.backgroundUrl : null);
   const [bgFile, setBgFile] = useState(null);
+
+  // Security State
+  const [secCurrentPassword, setSecCurrentPassword] = useState('');
+  const [secNewEmail, setSecNewEmail] = useState('');
+  const [secNewPassword, setSecNewPassword] = useState('');
+  const [secLoading, setSecLoading] = useState(false);
+  const [secError, setSecError] = useState('');
+  const [secSuccess, setSecSuccess] = useState('');
 
   // Sync state if store updates
   useEffect(() => {
@@ -141,6 +149,31 @@ const AdminDashboard = () => {
     }
   };
 
+  // --- SECURITY HANDLERS ---
+  const handleSecuritySubmit = async (e) => {
+    e.preventDefault();
+    if (!secCurrentPassword) {
+      setSecError('Current password is required to make security changes.');
+      return;
+    }
+    
+    setSecLoading(true);
+    setSecError('');
+    
+    try {
+      await updateAdminCredentials(secCurrentPassword, secNewEmail, secNewPassword);
+      setSecSuccess('Credentials updated successfully!');
+      setSecCurrentPassword('');
+      setSecNewPassword('');
+      // Keep email populated
+      setTimeout(() => setSecSuccess(''), 4000);
+    } catch (err) {
+      setSecError(err.message || 'Failed to update credentials. Check current password.');
+    } finally {
+      setSecLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-dark pt-20 px-6 pb-20">
       <div className="container mx-auto max-w-3xl">
@@ -154,7 +187,7 @@ const AdminDashboard = () => {
         <h1 className="text-4xl font-serif text-white mb-8">Admin Dashboard</h1>
 
         {/* TABS */}
-        <div className="flex space-x-4 mb-8 border-b border-white/10 pb-4">
+        <div className="flex flex-wrap gap-2 mb-8 border-b border-white/10 pb-4">
           <button 
             onClick={() => setActiveTab('posts')}
             className={`flex items-center px-4 py-2 rounded-lg transition-colors ${activeTab === 'posts' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
@@ -168,6 +201,13 @@ const AdminDashboard = () => {
           >
             <Settings size={18} className="mr-2" />
             Site Settings
+          </button>
+          <button 
+            onClick={() => setActiveTab('security')}
+            className={`flex items-center px-4 py-2 rounded-lg transition-colors ${activeTab === 'security' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+          >
+            <Lock size={18} className="mr-2" />
+            Account Security
           </button>
         </div>
         
@@ -331,6 +371,59 @@ const AdminDashboard = () => {
               <div className="flex justify-end pt-4 border-t border-white/10">
                 <button type="submit" disabled={settingsLoading} className="btn-primary bg-accent-pink hover:bg-accent-pink-light">
                   {settingsLoading ? 'Saving...' : 'Save Settings'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* SECURITY TAB */}
+        {activeTab === 'security' && (
+          <div className="bg-dark-lighter border border-white/10 rounded-2xl p-8">
+            <h2 className="text-xl font-medium text-white mb-2">Account Security</h2>
+            <p className="text-sm text-white/50 mb-6">Update your admin login credentials. You must provide your current password to make changes.</p>
+            
+            <form onSubmit={handleSecuritySubmit} className="space-y-6">
+              
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">Current Password (Required)</label>
+                <input
+                  type="password"
+                  value={secCurrentPassword}
+                  onChange={(e) => setSecCurrentPassword(e.target.value)}
+                  className="input-field border-white/20"
+                  required
+                />
+              </div>
+
+              <div className="pt-6 border-t border-white/10">
+                <label className="block text-sm font-medium text-white/70 mb-2">New Email Address (Optional)</label>
+                <input
+                  type="email"
+                  value={secNewEmail}
+                  onChange={(e) => setSecNewEmail(e.target.value)}
+                  className="input-field"
+                  placeholder="Leave blank to keep current email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">New Password (Optional)</label>
+                <input
+                  type="password"
+                  value={secNewPassword}
+                  onChange={(e) => setSecNewPassword(e.target.value)}
+                  className="input-field"
+                  placeholder="Leave blank to keep current password"
+                />
+              </div>
+
+              {secError && <p className="text-red-400 text-sm">{secError}</p>}
+              {secSuccess && <p className="text-green-400 text-sm">{secSuccess}</p>}
+              
+              <div className="flex justify-end pt-4 border-t border-white/10">
+                <button type="submit" disabled={secLoading} className="btn-primary bg-accent-pink hover:bg-accent-pink-light">
+                  {secLoading ? 'Updating...' : 'Update Credentials'}
                 </button>
               </div>
             </form>
