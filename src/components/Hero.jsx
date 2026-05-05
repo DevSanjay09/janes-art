@@ -3,7 +3,7 @@ import useStore from '../store/useStore';
 
 const Hero = () => {
   const { siteSettings } = useStore();
-  
+
   return (
     <section className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-black">
       {/* Background */}
@@ -20,7 +20,7 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-20 text-center px-4">
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
@@ -28,19 +28,19 @@ const Hero = () => {
         >
           {siteSettings.siteName}
         </motion.h1>
-        
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.8 }}
           className="text-accent-pink-light/80 text-lg md:text-xl max-w-2xl mx-auto font-light tracking-wide"
         >
-          Cinematic visual experiences and timeless moments.
+          Turning imagination into reality
         </motion.p>
       </div>
 
       {/* Scroll Indicator */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
